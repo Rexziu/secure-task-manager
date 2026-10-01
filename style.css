@@ -1,0 +1,139 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 32px 16px;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f1f4f9;
+  color: #1f2937;
+}
+
+.app {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+  margin: 0 0 20px;
+  text-align: center;
+  color: #1e3a8a;
+}
+
+.task-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#taskInput {
+  flex: 1 1 220px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+button {
+  padding: 9px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #ffffff;
+  background: #2563eb;
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+#loadSamplesBtn {
+  background: #475569;
+}
+
+.message {
+  min-height: 1.4em;
+  margin: 10px 0;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: #eff6ff;
+  border-radius: 8px;
+}
+
+.summary p {
+  margin: 0;
+  font-weight: 600;
+}
+
+#taskList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 5px solid #f59e0b;
+  border-radius: 8px;
+}
+
+.task-item[data-state="completed"] {
+  border-left-color: #16a34a;
+}
+
+.task-text {
+  flex: 1 1 160px;
+  word-break: break-word;
+}
+
+.task-item.completed .task-text {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.edit-input {
+  flex: 1 1 160px;
+  padding: 7px 10px;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.complete-btn {
+  background: #16a34a;
+}
+
+.edit-btn {
+  background: #d97706;
+}
+
+.remove-btn {
+  background: #dc2626;
+}
+
+@media (max-width: 480px) {
+  .summary {
+    flex-direction: column;
+  }
+}
