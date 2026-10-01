@@ -1,10 +1,10 @@
 :root {
-  --ink: #1d2733;
-  --muted: #5d6b7a;
-  --paper: #f5f7fa;
-  --card: #ffffff;
-  --line: #d5dce4;
-  --accent: #1f6feb;
+  --ink: #2e2540;
+  --muted: #6b5f80;
+  --paper: #ede6fb;
+  --card: #faf7ff;
+  --line: #d9ccf2;
+  --accent: #7c3aed;
   --done: #2e7d4f;
   --danger: #c0392b;
 }
@@ -82,7 +82,7 @@ button:hover { filter: brightness(0.92); }
   border-radius: 6px;
 }
 
-.task-item[data-state="completed"] { border-left-color: var(--done); background: #f1f8f4; }
+.task-item[data-state="completed"] { border-left-color: var(--done); background: #eef6f1; }
 
 .task-text { flex: 1 1 10rem; overflow-wrap: anywhere; }
 .task-item.completed .task-text { text-decoration: line-through; color: var(--muted); }
