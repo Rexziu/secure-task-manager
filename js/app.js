@@ -1,25 +1,114 @@
+"use strict";
 
-import { SAMPLE_TASKS, EMPTY_MESSAGE } from "./data.js";
-import { isBlank, generateTaskId } from "./utils.js";
-import {
-  elements,
-  showMessage,
-  clearMessage,
-  createTaskElement,
-  updateTaskCounts
-} from "./display.js";
+const EMPTY_TASK_MESSAGE = "Task cannot be empty";
 
-const { taskInput, addTaskBtn, loadSamplesBtn, taskList } = elements;
+const SAMPLE_TASKS = [
+  "Review DOM selectors",
+  "Practice createElement",
+  "Study event delegation"
+];
+
+let taskCounter = 0;
+
+const taskInput = document.getElementById("taskInput");
+const addTaskBtn = document.getElementById("addTaskBtn");
+const loadSamplesBtn = document.getElementById("loadSamplesBtn");
+const taskList = document.getElementById("taskList");
+const taskMessage = document.getElementById("taskMessage");
+const totalCount = document.getElementById("totalCount");
+const pendingCount = document.getElementById("pendingCount");
+const completedCount = document.getElementById("completedCount");
+
+
+function getCleanText(value) {
+  return value.trim();
+}
+
+function showMessage(message) {
+  taskMessage.textContent = message;
+}
+
+function clearMessage() {
+  taskMessage.textContent = "";
+}
+
+function generateTaskId() {
+  let id;
+  do {
+    taskCounter += 1;
+    id = `task-${taskCounter}`;
+  } while (taskList.querySelector(`[data-task-id="${id}"]`));
+  return id;
+}
+
+
+function createButton(className, label) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = className;
+  button.textContent = label;
+  return button;
+}
+
+function createTextSpan(text) {
+  const span = document.createElement("span");
+  span.classList.add("task-text");
+  span.textContent = text;
+  return span;
+}
+
+function createEditInput(currentText) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.classList.add("edit-input");
+  input.value = currentText;
+  input.setAttribute("aria-label", "Edit task");
+  return input;
+}
+
+function createTaskElement(taskText, taskId) {
+  const taskItem = document.createElement("li");
+  taskItem.classList.add("task-item");
+  taskItem.dataset.taskId = taskId;
+  taskItem.dataset.state = "pending";
+
+  taskItem.append(
+    createTextSpan(taskText),
+    createButton("complete-btn", "Complete"),
+    createButton("edit-btn", "Edit"),
+    createButton("remove-btn", "Remove")
+  );
+
+  return taskItem;
+}
+
+function updateTaskCounts() {
+  const tasks = Array.from(taskList.querySelectorAll(".task-item"));
+  const countByState = (state) =>
+    tasks.filter((task) => task.dataset.state === state).length;
+
+  const counts = {
+    total: tasks.length,
+    pending: countByState("pending"),
+    completed: countByState("completed")
+  };
+
+  const { total, pending, completed } = counts;
+  totalCount.textContent = total;
+  pendingCount.textContent = pending;
+  completedCount.textContent = completed;
+}
+
 
 function addTask(taskText) {
-  if (isBlank(taskText)) {
-    showMessage(EMPTY_MESSAGE);
+  const cleanText = getCleanText(taskText);
+
+  if (cleanText === "") {
+    showMessage(EMPTY_TASK_MESSAGE);
     return;
   }
 
-  const taskItem = createTaskElement(taskText.trim(), generateTaskId(taskList));
-  taskList.appendChild(taskItem);
-
+  taskList.appendChild(createTaskElement(cleanText, generateTaskId()));
   taskInput.value = "";
   clearMessage();
   updateTaskCounts();
@@ -33,39 +122,24 @@ function toggleTaskComplete(taskItem) {
 
 function beginTaskEdit(taskItem) {
   const textSpan = taskItem.querySelector(".task-text");
-  const editBtn = taskItem.querySelector(".edit-btn");
-  if (!textSpan || !editBtn) {
-    return;
-  }
-
-  const editInput = document.createElement("input");
-  editInput.type = "text";
-  editInput.classList.add("edit-input");
-  editInput.value = textSpan.textContent;
+  const editInput = createEditInput(textSpan.textContent);
 
   textSpan.replaceWith(editInput);
-  editBtn.textContent = "Save";
+  taskItem.querySelector(".edit-btn").textContent = "Save";
   editInput.focus();
 }
 
 function saveTaskEdit(taskItem) {
   const editInput = taskItem.querySelector(".edit-input");
-  const editBtn = taskItem.querySelector(".edit-btn");
-  if (!editInput || !editBtn) {
+  const cleanText = getCleanText(editInput.value);
+
+  if (cleanText === "") {
+    showMessage(EMPTY_TASK_MESSAGE);
     return;
   }
 
-  if (isBlank(editInput.value)) {
-    showMessage(EMPTY_MESSAGE);
-    return;
-  }
-
-  const textSpan = document.createElement("span");
-  textSpan.classList.add("task-text");
-  textSpan.textContent = editInput.value.trim();
-
-  editInput.replaceWith(textSpan);
-  editBtn.textContent = "Edit";
+  editInput.replaceWith(createTextSpan(cleanText));
+  taskItem.querySelector(".edit-btn").textContent = "Edit";
   clearMessage();
 }
 
@@ -75,25 +149,22 @@ function removeTask(taskItem) {
 }
 
 function handleTaskListClick(event) {
-  const target = event.target;
-  if (!target.matches(".complete-btn, .edit-btn, .remove-btn")) {
+  const clicked = event.target;
+  const taskItem = clicked.closest(".task-item");
+
+  if (!taskItem || !taskList.contains(taskItem)) {
     return;
   }
 
-  const taskItem = target.closest(".task-item");
-  if (!taskItem) {
-    return;
-  }
-
-  if (target.matches(".complete-btn")) {
+  if (clicked.matches(".complete-btn")) {
     toggleTaskComplete(taskItem);
-  } else if (target.matches(".edit-btn")) {
+  } else if (clicked.matches(".edit-btn")) {
     if (taskItem.querySelector(".edit-input")) {
       saveTaskEdit(taskItem);
     } else {
       beginTaskEdit(taskItem);
     }
-  } else if (target.matches(".remove-btn")) {
+  } else if (clicked.matches(".remove-btn")) {
     removeTask(taskItem);
   }
 }
@@ -102,7 +173,7 @@ function loadSampleTasks() {
   const fragment = document.createDocumentFragment();
 
   SAMPLE_TASKS.forEach((sampleText) => {
-    fragment.appendChild(createTaskElement(sampleText, generateTaskId(taskList)));
+    fragment.appendChild(createTaskElement(sampleText, generateTaskId()));
   });
 
   taskList.appendChild(fragment);
@@ -110,9 +181,10 @@ function loadSampleTasks() {
   updateTaskCounts();
 }
 
-taskList.addEventListener("click", handleTaskListClick);
+
 addTaskBtn.addEventListener("click", () => addTask(taskInput.value));
 loadSamplesBtn.addEventListener("click", loadSampleTasks);
+taskList.addEventListener("click", handleTaskListClick);
 taskInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     addTask(taskInput.value);
