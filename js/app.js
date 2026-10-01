@@ -1,3 +1,4 @@
+/* MAIN MODULE: task actions, event delegation, and application start-up. */
 
 import { SAMPLE_TASKS, EMPTY_MESSAGE } from "./data.js";
 import { isBlank, generateTaskId } from "./utils.js";
