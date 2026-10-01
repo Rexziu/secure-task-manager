@@ -1,9 +1,24 @@
 
-import { MESSAGES, SAMPLE_TASKS, TASK_STATES } from "./data.js";
-import { createTaskIdGenerator, validateTaskText, countTasks } from "./utils.js";
-import { showMessage, clearMessage, renderCounts } from "./display.js";
+const TASK_ID_PREFIX = "task-";
 
+const TASK_STATES = {
+  pending: "pending",
+  completed: "completed"
+};
 
+const MESSAGES = {
+  emptyTask: "Task cannot be empty"
+};
+
+const SAMPLE_TASKS = [
+  { text: "Review DOM selectors" },
+  { text: "Practice createElement" },
+  { text: "Study event delegation" }
+];
+
+let taskCounter = 0;
+
+/* ---------- DOM references ---------- */
 const taskInput = document.getElementById("taskInput");
 const addTaskBtn = document.getElementById("addTaskBtn");
 const loadSamplesBtn = document.getElementById("loadSamplesBtn");
@@ -15,9 +30,44 @@ const countElements = {
   completedEl: document.getElementById("completedCount")
 };
 
-const generateTaskId = createTaskIdGenerator();
+/* ---------- 2) UTILITY ---------- */
+function generateTaskId() {
+  taskCounter += 1;
+  return `${TASK_ID_PREFIX}${taskCounter}`;
+}
 
+function validateTaskText(rawText) {
+  const value = String(rawText).trim();
+  return { isValid: value.length > 0, value };
+}
 
+function countTasks(taskItems) {
+  const pending = taskItems.filter(
+    (item) => item.dataset.state === TASK_STATES.pending
+  ).length;
+  const completed = taskItems.filter(
+    (item) => item.dataset.state === TASK_STATES.completed
+  ).length;
+
+  return { total: taskItems.length, pending, completed };
+}
+
+/* ---------- 3) DISPLAY ---------- */
+function showMessage(message) {
+  taskMessage.textContent = message;
+}
+
+function clearMessage() {
+  taskMessage.textContent = "";
+}
+
+function renderCounts({ total, pending, completed }) {
+  countElements.totalEl.textContent = total;
+  countElements.pendingEl.textContent = pending;
+  countElements.completedEl.textContent = completed;
+}
+
+/* ---------- 4) TASK OPERATIONS ---------- */
 function createTaskElement(taskText, taskId) {
   const taskItem = document.createElement("li");
   taskItem.classList.add("task-item");
@@ -48,7 +98,7 @@ function addTask(taskText) {
   const { isValid, value } = validateTaskText(taskText);
 
   if (!isValid) {
-    showMessage(taskMessage, MESSAGES.emptyTask);
+    showMessage(MESSAGES.emptyTask);
     return;
   }
 
@@ -56,10 +106,9 @@ function addTask(taskText) {
   taskList.appendChild(taskItem);
 
   taskInput.value = "";
-  clearMessage(taskMessage);
+  clearMessage();
   updateTaskCounts();
 }
-
 
 function toggleTaskComplete(taskItem) {
   const isCompleted = taskItem.classList.toggle("completed");
@@ -96,7 +145,7 @@ function saveTaskEdit(taskItem) {
   const { isValid, value } = validateTaskText(editInput.value);
 
   if (!isValid) {
-    showMessage(taskMessage, MESSAGES.emptyTask);
+    showMessage(MESSAGES.emptyTask);
     return;
   }
 
@@ -106,7 +155,7 @@ function saveTaskEdit(taskItem) {
 
   editInput.replaceWith(newSpan);
   editBtn.textContent = "Edit";
-  clearMessage(taskMessage);
+  clearMessage();
 }
 
 function removeTask(taskItem) {
@@ -116,26 +165,26 @@ function removeTask(taskItem) {
 
 function updateTaskCounts() {
   const taskItems = Array.from(taskList.querySelectorAll(".task-item"));
-  renderCounts(countElements, countTasks(taskItems));
+  renderCounts(countTasks(taskItems));
 }
 
 function handleTaskListClick(event) {
-  const button = event.target;
-  const taskItem = button.closest(".task-item");
+  const target = event.target;
+  const taskItem = target.closest(".task-item");
 
   if (!taskItem) {
     return;
   }
 
-  if (button.matches(".complete-btn")) {
+  if (target.matches(".complete-btn")) {
     toggleTaskComplete(taskItem);
-  } else if (button.matches(".edit-btn")) {
+  } else if (target.matches(".edit-btn")) {
     if (taskItem.querySelector(".edit-input")) {
       saveTaskEdit(taskItem);
     } else {
       beginTaskEdit(taskItem);
     }
-  } else if (button.matches(".remove-btn")) {
+  } else if (target.matches(".remove-btn")) {
     removeTask(taskItem);
   }
 }
@@ -148,10 +197,11 @@ function loadSampleTasks() {
   });
 
   taskList.appendChild(fragment);
-  clearMessage(taskMessage);
+  clearMessage();
   updateTaskCounts();
 }
 
+/* ---------- 5) MAIN ---------- */
 taskList.addEventListener("click", handleTaskListClick);
 addTaskBtn.addEventListener("click", () => addTask(taskInput.value));
 loadSamplesBtn.addEventListener("click", loadSampleTasks);
